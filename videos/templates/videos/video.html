@@ -7,7 +7,7 @@
     <h1>Video Stream {{ number }}</h1>
     <img id="video" width="640" height="480" />
     <form>
-     <input type="button" value="Go back!" onclick="history.back()">
+         <a class="btn btn-primary" href="{% url 'index' %}">Go back</a>
     </form>
     <script>
         const socket = new WebSocket('ws://' + window.location.hostname + ':8100');

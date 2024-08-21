@@ -1,10 +1,10 @@
+from django.conf import settings
 import asyncio
 import websockets
 import base64
 import cv2
 import threading
 import json
-from django.conf import settings
 
 
 def fix_image(image):

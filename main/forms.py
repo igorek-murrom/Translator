@@ -1,5 +1,5 @@
 from django import forms
-from .models import UploadedFile
+from main.models import UploadedFile
 
 
 class UploadFileForm(forms.ModelForm):

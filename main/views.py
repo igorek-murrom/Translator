@@ -1,8 +1,9 @@
 from django.shortcuts import render, redirect
-from .forms import UploadFileForm
+from django.http import JsonResponse, HttpResponse
+from django.conf import settings
 import os
 import subprocess
-from django.http import JsonResponse, HttpResponse
+from main.forms import UploadFileForm
 
 
 def index(request):
@@ -29,23 +30,18 @@ def success(request):
     return render(request, 'main/success.html')
 
 
-process = None
-
-
 def start(request):
-    global process
-    if process is None:
-        process = subprocess.Popen(['python', 'sub_python/main.py'])
+    if settings.PROCESS is None:
+        settings.PROCESS = subprocess.Popen(['python', 'sub_python/main.py'])
         return JsonResponse({'status': 'started'})
     else:
-        return JsonResponse({'status': 'already running'})
+        return JsonResponse({'status': 'already started'})
 
 
 def stop(request):
-    global process
-    if process is not None:
-        process.terminate()
-        process = None
+    if settings.PROCESS is not None:
+        settings.PROCESS.terminate()
+        settings.PROCESS = None
         return JsonResponse({'status': 'stopped'})
     else:
         return JsonResponse({'status': 'not running'})
