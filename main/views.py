@@ -1,8 +1,11 @@
-from django.shortcuts import render, redirect
-from django.http import JsonResponse, HttpResponse
-from django.conf import settings
 import os
+import shutil
 import subprocess
+
+from django.conf import settings
+from django.http import JsonResponse, HttpResponse
+from django.shortcuts import render, redirect
+
 from main.forms import UploadFileForm
 
 
@@ -14,12 +17,15 @@ def upload(request):
     if request.method == 'POST':
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
-            uploaded_file = request.FILES['file']
-            file_path = os.path.join('sub_python', uploaded_file.name)
-            if os.path.exists(file_path):
-                os.remove(file_path)
+            if os.path.exists(settings.SUB_DIR):
+                shutil.rmtree(settings.SUB_DIR)
+            os.mkdir(settings.SUB_DIR)
 
-            form.save()
+            files = form.cleaned_data["file_field"]
+            for f in files:
+                fh = open(settings.SUB_DIR + str(f), 'ab')
+                fh.write(f.read())
+                fh.close()
             return redirect('success')
     else:
         form = UploadFileForm()
@@ -32,7 +38,7 @@ def success(request):
 
 def start(request):
     if settings.PROCESS is None:
-        settings.PROCESS = subprocess.Popen(['python', 'sub_python/main.py'])
+        settings.PROCESS = subprocess.Popen(['python', settings.SUB_DIR + 'main.py'])
         return JsonResponse({'status': 'started'})
     else:
         return JsonResponse({'status': 'already started'})
@@ -48,6 +54,23 @@ def stop(request):
 
 
 def show_code(request):
-    with open('sub_python/main.py', 'r') as file:
-        code = file.read()
-        return HttpResponse(code, content_type='text/plain')
+    if not os.path.exists(settings.SUB_DIR): return JsonResponse({'status': 'no code'})
+
+    code = ""
+    names = os.listdir(settings.SUB_DIR)
+    for f in names:
+        if f == "__pycache__": continue
+        code += "########## " + f + " ##########" + "\n"
+        file = open(settings.SUB_DIR + str(f), 'r')
+        try:
+            code += str(file.read())
+        except UnicodeDecodeError:
+            code += "error while reading file"
+        file.close()
+        code += '\n\n'
+    return HttpResponse(code, content_type='text/plain')
+
+
+def show_status(request):
+    if settings.PROCESS is None: return JsonResponse({'status': 'not running'})
+    return JsonResponse({'status': 'running'})

@@ -6,12 +6,16 @@
 <body>
     <header><h1>Translator</h1></header>
 
-    <a class="btn btn-primary" href="/upload">Upload Code</a>
-    <a class="btn btn-primary" href="/showcode">Show Code</a>
+    <article>
+        <a href="/upload"><button>Upload Code</button></a>
+        <a href="/showcode"><button>Show code</button></a>
+    </article>
+
 
     <article id="mainArticle">
-        <button onclick="startScript()">Start</button>
-        <button onclick="stopScript()">Stop</button>
+        <button onclick="responseScript('/start/')">Start</button>
+        <button onclick="responseScript('/stop/')">Stop</button>
+        <button onclick="responseScript('/status/')"> Get Status</button>
     </article>
 
     <aside>
@@ -23,11 +27,11 @@
         <label for="log"></label><textarea id="log" readonly rows="15" cols="100"></textarea>
     </article>
 
-    <a class="btn btn-primary" href="/video/1">Video 1</a>
-    <a class="btn btn-primary" href="/video/2">Video 2</a>
-    <a class="btn btn-primary" href="/video/3">Video 3</a>
-    <a class="btn btn-primary" href="/video/4">Video 4</a>
-    <a class="btn btn-primary" href="/video/5">Video 5</a>
+    <a href="/video/1"><button>Video 1</button></a>
+    <a href="/video/2"><button>Video 2</button></a>
+    <a href="/video/3"><button>Video 3</button></a>
+    <a href="/video/4"><button>Video 4</button></a>
+    <a href="/video/5"><button>Video 5</button></a>
 
     <script>
         const logContainer = document.getElementById('log');
@@ -66,14 +70,8 @@
             logContainer.value = '';
         }
 
-        function startScript() {
-            fetch('/start/')
-                .then(response => response.json())
-                .then(data => alert(data.status));
-        }
-
-        function stopScript() {
-            fetch('/stop/')
+        function responseScript(url) {
+            fetch(url)
                 .then(response => response.json())
                 .then(data => alert(data.status));
         }
