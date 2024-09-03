@@ -71,10 +71,11 @@ def show_code(request):
         ans += ' ' + (cnt + diff // 2) * '#' + '\n'
         return ans
 
-    if not os.path.exists(settings.SUB_DIR): return JsonResponse({'status': 'no code'})
+    if not os.path.exists(settings.SUB_DIR): return HttpResponse("no code", content_type='text/plain')
 
     code = ""
     names = os.listdir(settings.SUB_DIR)
+    if len(names) == 0: return HttpResponse("no code", content_type='text/plain')
     len_name = len(sorted(names, key=len, reverse=True)[0])
     for f in names:
         if f == "__pycache__": continue

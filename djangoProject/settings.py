@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
-
+import socket
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -27,7 +27,7 @@ DEBUG = False
 
 PROCESS = None
 SUB_DIR = 'sub/project/'
-MAIN_HOST = ''
+MAIN_HOST = socket.gethostbyname(socket.gethostname())
 ALLOWED_HOSTS = [MAIN_HOST]
 
 # Application definition
