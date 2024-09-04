@@ -1,6 +1,9 @@
 import os
 import shutil
 import subprocess
+import socket
+import json
+import struct
 
 from django.conf import settings
 from django.http import JsonResponse, HttpResponse
@@ -95,12 +98,6 @@ def show_status(request):
     return JsonResponse({'status': 'running'})
 
 
-# views.py
-from django.shortcuts import render, redirect
-from django.http import HttpResponse
-import os
-
-
 def edit_script(request):
     file_path = os.path.join('sub', 'command.txt')
 
@@ -114,3 +111,27 @@ def edit_script(request):
         command = file.read()
 
     return render(request, 'main/edit_script.html', {'command': command})
+
+
+def keyboard_view(request):
+    return render(request, 'main/keyboard.html')
+
+
+def handle_keypress(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            keys = data['keys']
+            send_command_to_script(keys)
+            return JsonResponse({'status': 'success', 'response': 'mb good'})
+        except json.JSONDecodeError:
+            return JsonResponse({'status': 'error', 'message': 'Invalid JSON'}, status=400)
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
+
+
+server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+
+
+def send_command_to_script(keys):
+    server_socket.sendto(json.dumps(keys).encode('utf-8'), ('<broadcast>', 65432))

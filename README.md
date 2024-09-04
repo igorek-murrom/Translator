@@ -29,7 +29,7 @@ python3 manage.py runserver ip:8000 --noreload
 
 Для удобной работы создайте файл (или вставьте в главный скрипт) с кодом:
 ``` python
-from django.conf import settings
+import socket
 import asyncio
 import websockets
 import base64
@@ -88,33 +88,51 @@ class ImageWebSocketServer:
             if message and self.clients:
                 json_message = json.dumps(message)
                 tasks = [asyncio.create_task(client.send(json_message)) for client in self.clients]
-                # FIXME
                 try:
                     await asyncio.gather(*tasks)
-                except:
-                    print("error")
+                except Exception as e:
+                    print(f"Error broadcasting message: {e}")
 
             await asyncio.sleep(0.001)
 
-    def start_server(self):
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        start_server = websockets.serve(self.send_image, self.host, self.port)
-        loop.run_until_complete(start_server)
-        loop.create_task(self.broadcast())
-        print(f"Server started at ws://{self.host}:{self.port}")
-        loop.run_forever()
+    async def start_server(self):
+        async with websockets.serve(self.send_image, self.host, self.port):
+            print(f"Server started at ws://{self.host}:{self.port}")
+            await self.broadcast()
+
 
 class Robot:
-    def __init__(self, host=settings.MAIN_HOST):
-        self.server = ImageWebSocketServer(host)
-        server_thread = threading.Thread(target=self.server.start_server)
-        server_thread.start()
+    def __init__(self):
+        self.server = ImageWebSocketServer(socket.gethostbyname(socket.gethostname()))
+        self.key_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.key_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        self.key_socket.bind(('', 65432))
+
+        self.keys = []
+
+        thread = threading.Thread(target=self.run_server)
+        thread.start()
 
     def show(self, image, channel: int) -> None:
         self.server.set_image(image, channel)
 
-    def log(self, msg):
+    def log(self, msg) -> None:
         self.server.set_log(msg)
 
+    def read_keys(self):
+        return self.keys
+
+    def run_server(self):
+        asyncio.run(self.start_server())
+
+    async def start_server(self):
+        server_task = asyncio.create_task(self.server.start_server())
+        key_task = asyncio.create_task(self.task_read())
+        await asyncio.gather(server_task, key_task)
+
+    async def task_read(self):
+        print("Key server started")
+        while True:
+            data, _ = await asyncio.get_event_loop().run_in_executor(None, self.key_socket.recvfrom, 1024)
+            self.keys = json.loads(data.decode('utf-8'))
 ```

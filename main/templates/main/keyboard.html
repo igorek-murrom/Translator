@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Keyboard</title>
+    <script>
+        let keys = {};
+        let lastSentKeys = [];
+        let intervalId = null;
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        document.addEventListener('keydown', function(event) {
+            if (!keys[event.key]) {
+                keys[event.key] = true;
+                sendKeys(true);
+            }
+        });
+
+        document.addEventListener('keyup', function(event) {
+            if (keys[event.key]) {
+                delete keys[event.key];
+                sendKeys(true);
+            }
+        });
+
+        function sendKeys(force = false) {
+            const csrftoken = getCookie('csrftoken');
+            const currentKeys = Object.keys(keys);
+
+            if (force || JSON.stringify(currentKeys) !== JSON.stringify(lastSentKeys)) {
+
+            }
+            lastSentKeys = currentKeys;
+
+                fetch('/handle_keypress/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken
+                    },
+                    body: JSON.stringify({ keys: currentKeys })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log(data);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+
+        intervalId = setInterval(() => sendKeys(false), 1000);
+
+        window.addEventListener('beforeunload', function() {
+            if (intervalId) {
+                clearInterval(intervalId);
+            }
+        });
+    </script>
+</head>
+<body>
+    <h1>Keyboard</h1>
+    <form>
+        <a class="btn btn-primary" href="{% url 'index' %}">Go back</a>
+    </form>
+</body>
+</html>
