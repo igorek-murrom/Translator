@@ -37,7 +37,7 @@
 
     <script>
         const logContainer = document.getElementById('log');
-        const socket = new WebSocket('ws://' + window.location.hostname + ':8100');
+        const socket = new WebSocket('ws://' + window.location.hostname + ':8000/ws/');
         const scrollButton = document.getElementById('autoScrollButton');
         let autoScroll = false;
 

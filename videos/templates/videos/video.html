@@ -10,7 +10,7 @@
          <a class="btn btn-primary" href="{% url 'index' %}">Go back</a>
     </form>
     <script>
-        const socket = new WebSocket('ws://' + window.location.hostname + ':8100');
+        const socket = new WebSocket('ws://' + window.location.hostname + ':8000/ws/');
         let main_num = {{ number }};
 
         socket.onopen = function() {

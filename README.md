@@ -24,7 +24,7 @@ django, websockets, opencv-python
 
 Команда для запуска (вместо ip укажите найденный айпи-адресс):
 ```text
-python3 manage.py runserver ip:8000 --noreload
+uvicorn djangoProject.asgi:application --host ip --port 8000
 ```
 
 Для удобной работы создайте файл (или вставьте в главный скрипт) с кодом:
