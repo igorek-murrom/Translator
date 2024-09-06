@@ -5,11 +5,19 @@
 </head>
 <body>
     <h1>Video Stream {{ number }}</h1>
-    <img id="video"  />
     <form>
          <a class="btn btn-primary" href="{% url 'index' %}">Go back</a>
     </form>
     <script>
+        const imageElements = [];
+        const imageContainer = document.getElementById('image-container');
+
+        for (let i = 0; i < 5; i++) {
+            const img = document.createElement("img");
+            imageElements.push(img);
+            imageContainer.appendChild(img); // Добавляем элемент в контейнер
+        }
+        
         const socket = new WebSocket('ws://' + window.location.hostname + ':8100');
         let main_num = {{ number }};
 
@@ -22,10 +30,11 @@
         };
 
         socket.onmessage = function(event) {
-            let frame = JSON.parse(event.data)['images'][main_num];
-            const img = document.getElementById('video')
-            if (frame !== null) {
-                img.src = 'data:image/jpeg;base64,' + frame;
+            let images = JSON.parse(event.data)['images'];
+            for (let i = 1; i <= 5; i++) {
+                if (images[i] !== null) {
+                    imageElements[i].src = 'data:image/jpeg;base64,' + images[i];
+                }
             }
         };
     </script>

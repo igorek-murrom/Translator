@@ -17,6 +17,9 @@ class MainConfig(AppConfig):
         from django.conf import settings
         import subprocess
         import os
+        import threading
+        from main import servers
+
         try:
             if os.path.exists(settings.SUB_DIR):
                 files = os.listdir(settings.SUB_DIR)
@@ -29,3 +32,9 @@ class MainConfig(AppConfig):
                         settings.PROCESS = subprocess.Popen(get_cmd())
         except:
             print("error in autostart")
+
+        websocket_thread = threading.Thread(target=servers.start_websocket)
+        socket_thread = threading.Thread(target=servers.start_socket)
+
+        websocket_thread.start()
+        socket_thread.start()

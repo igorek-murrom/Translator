@@ -25,24 +25,21 @@
         document.addEventListener('keydown', function(event) {
             if (!keys[event.key]) {
                 keys[event.key] = true;
-                sendKeys(true);
+                sendKeys();
             }
         });
 
         document.addEventListener('keyup', function(event) {
             if (keys[event.key]) {
                 delete keys[event.key];
-                sendKeys(true);
+                sendKeys();
             }
         });
 
-        function sendKeys(force = false) {
+        function sendKeys() {
             const csrftoken = getCookie('csrftoken');
             const currentKeys = Object.keys(keys);
 
-            if (force || JSON.stringify(currentKeys) !== JSON.stringify(lastSentKeys)) {
-
-            }
             lastSentKeys = currentKeys;
 
                 fetch('/handle_keypress/', {
@@ -67,7 +64,7 @@
                 });
         }
 
-        intervalId = setInterval(() => sendKeys(false), 1000);
+        intervalId = setInterval(() => sendKeys(), 1000);
 
         window.addEventListener('beforeunload', function() {
             if (intervalId) {

@@ -1,9 +1,8 @@
 import os
 import shutil
 import subprocess
-import socket
 import json
-import struct
+import fcntl
 
 from django.conf import settings
 from django.http import JsonResponse, HttpResponse
@@ -129,9 +128,8 @@ def handle_keypress(request):
     return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
 
 
-server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-
-
 def send_command_to_script(keys):
-    server_socket.sendto(json.dumps(keys).encode('utf-8'), ('<broadcast>', 65432))
+    with open("/mnt/ramdisk/transitOUT.txt", 'w') as f:
+        fcntl.flock(f, fcntl.LOCK_EX)
+        f.write(json.dumps(keys))
+        fcntl.flock(f, fcntl.LOCK_UN)
