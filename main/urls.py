@@ -15,4 +15,6 @@ urlpatterns = [
 
     path('keyboard/', views.keyboard_view, name='keyboard_view'),
     path('handle_keypress/', views.handle_keypress, name='handle_keypress'),
+
+    path('video/<int:number>/', views.video, name='video'),
 ]

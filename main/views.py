@@ -16,6 +16,10 @@ def index(request):
     return render(request, 'main/index.html')
 
 
+def video(request, number):
+    return render(request, 'main/video.html', {'number': number})
+
+
 def upload(request):
     if request.method == 'POST':
         form = UploadFileForm(request.POST, request.FILES)
