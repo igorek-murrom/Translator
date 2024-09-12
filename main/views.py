@@ -91,6 +91,11 @@ def show_code(request):
     return HttpResponse(code, content_type='text/plain')
 
 
+def show_output(request):
+    with open(os.path.join('sub', 'output.txt'), 'r') as file:
+        return HttpResponse(file.read(), content_type='text/plain')
+
+
 def edit_script(request):
     file_path = os.path.join('sub', 'command.txt')
 

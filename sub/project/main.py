@@ -110,15 +110,14 @@ class Robot:
 
 robot = Robot()
 cnt = 0
-# cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(0)
 while True:
-    # ret, frame = cap.read()
-    # if not ret: continue
-    # robot.show(frame, 1)
-    # robot.show(cv2.flip(frame, 0), 2)
-    # robot.show(cv2.flip(frame, 1), 3)
+    ret, frame = cap.read()
+    if not ret: continue
+    robot.show(frame, 1)
+    robot.show(cv2.flip(frame, 0), 2)
+    robot.show(cv2.flip(frame, 1), 3)
 
     robot.log(cnt)
     cnt += 1
     print(robot.read_keys())
-    time.sleep(0.02)

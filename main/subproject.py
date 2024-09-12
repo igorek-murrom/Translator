@@ -53,6 +53,9 @@ class SubProgram:
                 print(f"Program output:\n{stdout}")
                 if stderr:
                     print(f"Program errors:\n{stderr}")
+                with open(os.path.join('sub', 'output.txt'), 'w') as f:
+                    f.write(stdout)
+                    f.write(stderr)
             except Exception as e:
                 print(f"Error while running the program: {e}")
             finally:
