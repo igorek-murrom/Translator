@@ -5,6 +5,12 @@ import os
 from django.conf import settings
 
 
+def get_cmd() -> list:
+    with open(os.path.join('sub', 'command.txt'), 'r') as cmd:
+        command = shlex.split(cmd.read())
+    return command
+
+
 class SubProgram:
     def __init__(self):
         self.process = None
@@ -13,7 +19,7 @@ class SubProgram:
     def start(self) -> bool:
         if self.process is not None:
             return False
-        self.process = subprocess.Popen(self.get_cmd(), stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        self.process = subprocess.Popen(get_cmd(), stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, cwd=settings.SUB_DIR)
         print(self.process)
         self.monitor_thread = threading.Thread(target=self.monitor_process)
         self.monitor_thread.start()
@@ -40,11 +46,6 @@ class SubProgram:
                 if status == "True":
                     return True
         return False
-
-    def get_cmd(self) -> list:
-        with open(os.path.join('sub', 'command.txt'), 'r') as cmd:
-            command = shlex.split(cmd.read())
-        return command
 
     def monitor_process(self):
         if self.is_running():
