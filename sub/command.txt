@@ -1,1 +1,1 @@
-python3 sub/project/main.py
+python sub/project/main.py

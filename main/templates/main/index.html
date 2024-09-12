@@ -26,7 +26,7 @@
         <button onClick="window.location.reload();">Refresh Page</button>
     </aside>
     <article>
-        <label for="log"></label><textarea id="log" readonly rows="15" cols="100"></textarea>
+        <label for="log"></label><textarea id="log" readonly rows="15" cols="50"></textarea>
     </article>
 
     <a href="/video/1"><button>Video 1</button></a>
@@ -39,6 +39,7 @@
         const logContainer = document.getElementById('log');
         const socket = new WebSocket('ws://' + window.location.hostname + ':8100');
         const scrollButton = document.getElementById('autoScrollButton');
+        const maxLogLength = 10000;
         let autoScroll = false;
 
         document.getElementById('mainArticle').className = 'formatForArticle';
@@ -54,6 +55,9 @@
         socket.onmessage = function(event) {
             let log = JSON.parse(event.data)['log'];
             if (log !== null) {
+                if (logContainer.value.length > maxLogLength) {
+                    clearArea();
+                }
                 for (const a in log) {
                     logContainer.value += '\n' + log[a];
                     if (autoScroll) logContainer.scrollTop = logContainer.scrollHeight;

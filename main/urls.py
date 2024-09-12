@@ -3,6 +3,7 @@ from main import views
 
 urlpatterns = [
     path('', views.index, name='index'),
+
     path('upload/', views.upload, name='upload_file'),
     path('success/', views.success, name='success'),
 

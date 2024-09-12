@@ -1,9 +1,7 @@
 import os
 import shutil
-import subprocess
 import socket
 import json
-import struct
 
 from django.conf import settings
 from django.http import JsonResponse, HttpResponse
@@ -30,9 +28,8 @@ def upload(request):
 
             files = form.cleaned_data["file_field"]
             for f in files:
-                fh = open(settings.SUB_DIR + str(f), 'ab')
-                fh.write(f.read())
-                fh.close()
+                with open(os.path.join(settings.SUB_DIR, str(f)), 'ab') as fh:
+                    fh.write(f.read())
             return redirect('success')
     else:
         form = UploadFileForm()
@@ -44,28 +41,26 @@ def success(request):
 
 
 def start(request):
-    def get_cmd() -> list:
-        import shlex
-        cmd = open("sub/command.txt", 'r')
-        command = shlex.split(cmd.read())
-        cmd.close()
-        return command
-
-    if settings.PROCESS is None:
-        settings.PROCESS = subprocess.Popen(get_cmd())
-        print(settings.PROCESS)
-        return JsonResponse({'status': 'started'})
-    else:
+    if settings.PROCESS.is_running():
         return JsonResponse({'status': 'already started'})
+    else:
+        settings.PROCESS.start()
+        return JsonResponse({'status': 'started'})
 
 
 def stop(request):
-    if settings.PROCESS is not None:
-        settings.PROCESS.terminate()
-        settings.PROCESS = None
-        return JsonResponse({'status': 'stopped'})
+    if not settings.PROCESS.is_running():
+        return JsonResponse({'status': 'already stopped'})
     else:
-        return JsonResponse({'status': 'not running'})
+        settings.PROCESS.stop()
+        return JsonResponse({'status': 'stopped'})
+
+
+def show_status(request):
+    if settings.PROCESS.is_running():
+        return JsonResponse({'status': 'running'})
+    else:
+        return JsonResponse({'status': 'NOT running'})
 
 
 def show_code(request):
@@ -87,19 +82,13 @@ def show_code(request):
     for f in names:
         if f == "__pycache__": continue
         code += get_name(len_name, f, len_name * 2)
-        file = open(settings.SUB_DIR + str(f), 'r')
-        try:
-            code += str(file.read())
-        except UnicodeDecodeError:
-            code += "error while reading file"
-        file.close()
+        with open(os.path.join(settings.SUB_DIR, str(f)), 'r') as file:
+            try:
+                code += str(file.read())
+            except UnicodeDecodeError:
+                code += "error while reading file"
         code += '\n\n'
     return HttpResponse(code, content_type='text/plain')
-
-
-def show_status(request):
-    if settings.PROCESS is None: return JsonResponse({'status': 'not running'})
-    return JsonResponse({'status': 'running'})
 
 
 def edit_script(request):
