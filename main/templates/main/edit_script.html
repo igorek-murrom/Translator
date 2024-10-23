@@ -22,7 +22,7 @@
     </form>
     <form method="post">
         {% csrf_token %}
-        <textarea id="command" name="command" rows="10" cols="50">{{ command }}</textarea><br>
+        <label for="command"></label><textarea id="command" name="command" rows="10" cols="50">{{ command }}</textarea><br>
         <button type="submit">Save</button>
     </form>
 </body>

@@ -2,11 +2,15 @@
 <html>
 <head>
     <title>Keyboard</title>
+    <article>
+        <label for="log"></label><textarea id="log" readonly rows="3" cols="50"></textarea>
+    </article>
     <script>
         let keys = {};
         let lastSentKeys = [];
         let intervalId = null;
-
+        const logContainer = document.getElementById("log");
+        
         function getCookie(name) {
             let cookieValue = null;
             if (document.cookie && document.cookie !== '') {
@@ -39,32 +43,28 @@
         function sendKeys(force = false) {
             const csrftoken = getCookie('csrftoken');
             const currentKeys = Object.keys(keys);
-
-            if (force || JSON.stringify(currentKeys) !== JSON.stringify(lastSentKeys)) {
-
-            }
             lastSentKeys = currentKeys;
-
-                fetch('/handle_keypress/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': csrftoken
-                    },
-                    body: JSON.stringify({ keys: currentKeys })
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log(data);
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
+            logContainer.value = lastSentKeys.toString();
+            fetch('/handle_keypress/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify({ keys: currentKeys })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
         }
 
         intervalId = setInterval(() => sendKeys(false), 1000);
